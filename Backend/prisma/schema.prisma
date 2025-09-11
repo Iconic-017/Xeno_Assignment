@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  apiKey    String?  @unique
+  createdAt DateTime @default(now())
+  stores    Store[]
+}
+
+model Store {
+  id        Int        @id @default(autoincrement())
+  name      String
+  tenantId  Int
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  customers Customer[]
+  orders    Order[]
+  products  Product[]
+
+  // Optional: auto-clean related data if store deleted
+  @@map("stores")
+}
+
+model Customer {
+  id         Int       @id @default(autoincrement())
+  shopifyId  String    @unique
+  name       String
+  email      String?
+  phone      String?
+  city       String?
+  state      String?
+  country    String?
+  zip        String?
+  tenantId   Int
+  storeId    Int
+  store      Store     @relation(fields: [storeId], references: [id])
+  orders     Order[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  shopifyId  String      @unique
+  amount     Float
+  createdAt  DateTime    @default(now())
+  tenantId   Int
+  storeId    Int
+  store      Store       @relation(fields: [storeId], references: [id])
+  customerId Int?
+  customer   Customer?   @relation(fields: [customerId], references: [id])
+  items      OrderItem[]
+}
+
+model Product {
+  id         Int         @id @default(autoincrement())
+  shopifyId  String      @unique
+  title      String
+  price      Float
+  tenantId   Int
+  storeId    Int
+  store      Store       @relation(fields: [storeId], references: [id])
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int     @default(1)   // sensible default
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId]) // prevent duplicate product per order
+}
