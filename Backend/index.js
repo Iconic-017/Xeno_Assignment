@@ -5,7 +5,7 @@ import authRoutes from "./routes/auth.routes.js"
 import shopifyRoutes from "./routes/shopify.routes.js";
 import insightsRoutes from "./routes/insights.routes.js";
 
-const FrontedURL = "https://xeno-assignment-two.vercel.app/";
+const FrontedURL = "https://xeno-assignment-two.vercel.app";
 
 
 const app = express();
