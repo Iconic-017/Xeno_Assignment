@@ -50,10 +50,10 @@ export default function Dashboard() {
 
         const [overviewRes, revenueRes, customersRes, productsRes] =
          await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_BASE_URL}/overview`, { headers }),
-          axios.get(`${import.meta.env.VITE_API_BASE_URL}/revenue`, { headers }),
-          axios.get(`${import.meta.env.VITE_API_BASE_URL}/top-customers`, { headers }),
-          axios.get(`${import.meta.env.VITE_API_BASE_URL}/top-products`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/insights/overview`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/insights/revenue`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/insights/top-customers`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/insights/top-products`, { headers }),
         ]);
 
         setOverview(overviewRes.data);
