@@ -18,13 +18,10 @@ app.use("/auth", authRoutes);
 app.use("/shopify", shopifyRoutes);
 app.use("/insights", insightsRoutes);
 
-
-// Health check
 app.get("/", (req, res) => {
   res.json({ message: "API is running 🚀" });
 });
 
-// Example: fetch all tenants
 app.get("/tenants", async (req, res) => {
   const tenants = await prisma.tenant.findMany();
   res.json(tenants);

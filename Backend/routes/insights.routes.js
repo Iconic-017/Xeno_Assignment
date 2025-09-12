@@ -1,4 +1,3 @@
-// routes/insights.routes.js
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -8,40 +7,39 @@ const prisma = new PrismaClient();
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// ✅ 1. Overview API
-
+//1. Overview API
 router.get("/overview", authMiddleware, async (req, res) => {
-  try {
-    const tenantId = req.tenantId;
+    try {
+      const tenantId = req.tenantId;
 
-    const [totalCustomers, totalProducts, totalOrders, revenueAgg] =
-      await Promise.all([
-        prisma.customer.count({ where: { tenantId } }),
-        prisma.product.count({ where: { tenantId } }),
-        prisma.order.count({ where: { tenantId } }),
-        prisma.order.aggregate({
-          where: { tenantId },
-          _sum: { amount: true }
-        })
-      ]);
+      const [totalCustomers, totalProducts, totalOrders, revenueAgg] =
+        await Promise.all([
+          prisma.customer.count({ where: { tenantId } }),
+          prisma.product.count({ where: { tenantId } }),
+          prisma.order.count({ where: { tenantId } }),
+          prisma.order.aggregate({
+            where: { tenantId },
+            _sum: { amount: true }
+          })
+        ]);
 
-    const totalRevenue = revenueAgg._sum?.amount ?? 0;
+      const totalRevenue = revenueAgg._sum?.amount ?? 0;
 
-    res.json({
-      totalCustomers,
-      totalOrders,
-      totalRevenue,
-      totalProducts
-    });
-  } catch (err) {
-    console.error("Insights > overview error:", err);
-    res
-      .status(500)
-      .json({ error: isDev ? err.message : "Failed to load overview" });
-  }
+      res.json({
+        totalCustomers,
+        totalOrders,
+        totalRevenue,
+        totalProducts
+      });
+    } catch (err) {
+      console.error("Insights > overview error:", err);
+      res
+        .status(500)
+        .json({ error: isDev ? err.message : "Failed to load overview" });
+    }
 });
 
-// ✅ 2. Revenue Over Time
+//2. Revenue Over Time
 router.get("/revenue", authMiddleware, async (req, res) => {
   try {
     const tenantId = req.tenantId;
@@ -79,7 +77,7 @@ router.get("/revenue", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ 3. Top Customers
+//3. Top Customers
 router.get("/top-customers", authMiddleware, async (req, res) => {
   try {
     const tenantId = req.tenantId;
@@ -96,9 +94,9 @@ router.get("/top-customers", authMiddleware, async (req, res) => {
         email: c.email,
         totalSpent: c.orders.reduce((sum, o) => sum + o.amount, 0)
       }))
-      .filter((c) => c.totalSpent > 0) // exclude zero spenders
+      .filter((c) => c.totalSpent > 0)
       .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 5); // limit to top 5
+      .slice(0, 5);
 
     res.json(result);
   } catch (err) {
@@ -109,7 +107,7 @@ router.get("/top-customers", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ 4. Top Products
+//4. Top Products
 router.get("/top-products", authMiddleware, async (req, res) => {
   try {
     const tenantId = req.tenantId;
@@ -134,9 +132,9 @@ router.get("/top-products", authMiddleware, async (req, res) => {
           revenue: totalRevenue
         };
       })
-      .filter((p) => p.sold > 0) // exclude products with no sales
+      .filter((p) => p.sold > 0)
       .sort((a, b) => b.sold - a.sold)
-      .slice(0, 5); // limit to top 5
+      .slice(0, 5);
 
     res.json(result);
   } catch (err) {

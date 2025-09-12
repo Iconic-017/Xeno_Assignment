@@ -11,13 +11,12 @@ router.post("/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const tenant = await prisma.tenant.create({
       data: {
         name,
-        email, // just storing email here for now
+        email,
         password: hashedPassword
       }
     });
@@ -42,7 +41,6 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, tenant.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
-    // Generate JWT
     const token = jwt.sign(
       { tenantId: tenant.id },
       process.env.JWT_SECRET,

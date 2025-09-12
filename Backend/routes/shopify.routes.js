@@ -20,7 +20,7 @@ router.post("/sync", authMiddleware, async (req, res) => {
       },
     });
 
-    // ✅ Ensure Store exists for this tenant
+    // Ensure Store exists for this tenant
     let store = await prisma.store.findFirst({ where: { tenantId } });
     if (!store) {
       store = await prisma.store.create({
@@ -31,7 +31,7 @@ router.post("/sync", authMiddleware, async (req, res) => {
       });
     }
 
-    // ✅ Sync Customers
+    // Sync Customers
     const customersRes = await shopifyClient.get("/customers.json");
     for (const c of customersRes.data.customers) {
       await prisma.customer.upsert({
@@ -62,7 +62,7 @@ router.post("/sync", authMiddleware, async (req, res) => {
       });
     }
 
-    // ✅ Sync Products
+    // Sync Products
     const productsRes = await shopifyClient.get("/products.json");
     for (const p of productsRes.data.products) {
       await prisma.product.upsert({
@@ -83,63 +83,63 @@ router.post("/sync", authMiddleware, async (req, res) => {
       });
     }
 
-    // ✅ Sync Orders + Line Items 
-const ordersRes = await shopifyClient.get("/orders.json?status=any");
-for (const o of ordersRes.data.orders) {
-  // find related customer (if exists)
-  const customer = o.customer
-    ? await prisma.customer.findUnique({
-        where: { shopifyId: String(o.customer.id) },
-      })
-    : null;
+    // Sync Orders + Line Items 
+  const ordersRes = await shopifyClient.get("/orders.json?status=any");
+  for (const o of ordersRes.data.orders) {
+    // find related customer (if exists)
+    const customer = o.customer
+      ? await prisma.customer.findUnique({
+          where: { shopifyId: String(o.customer.id) },
+        })
+      : null;
 
-  const savedOrder = await prisma.order.upsert({
-    where: { shopifyId: String(o.id) },
-    update: {
-      amount: o.total_price ? parseFloat(o.total_price) : 0,
-      createdAt: new Date(o.created_at),
-      customerId: customer ? customer.id : null,  // ✅ link to customer
-      storeId: store.id,
-      tenantId,
-    },
-    create: {
-      shopifyId: String(o.id),
-      amount: o.total_price ? parseFloat(o.total_price) : 0,
-      createdAt: new Date(o.created_at),
-      tenantId,
-      storeId: store.id,
-      customerId: customer ? customer.id : null,  // ✅ link to customer
-    },
-  });
-
-  // ✅ Sync line items
-  for (const item of o.line_items) {
-    const product = await prisma.product.findUnique({
-      where: { shopifyId: String(item.product_id) },
+    const savedOrder = await prisma.order.upsert({
+      where: { shopifyId: String(o.id) },
+      update: {
+        amount: o.total_price ? parseFloat(o.total_price) : 0,
+        createdAt: new Date(o.created_at),
+        customerId: customer ? customer.id : null,
+        storeId: store.id,
+        tenantId,
+      },
+      create: {
+        shopifyId: String(o.id),
+        amount: o.total_price ? parseFloat(o.total_price) : 0,
+        createdAt: new Date(o.created_at),
+        tenantId,
+        storeId: store.id,
+        customerId: customer ? customer.id : null,
+      },
     });
 
-    if (product) {
-      await prisma.orderItem.upsert({
-        where: {
-          orderId_productId: {
-            orderId: savedOrder.id,  // ✅ use savedOrder.id
-            productId: product.id,
-          },
-        },
-        update: {
-          quantity: item.quantity,
-          price: parseFloat(item.price),
-        },
-        create: {
-          orderId: savedOrder.id,   // ✅ use savedOrder.id
-          productId: product.id,
-          quantity: item.quantity,
-          price: parseFloat(item.price),
-        },
+  
+  for (const item of o.line_items) {
+      const product = await prisma.product.findUnique({
+        where: { shopifyId: String(item.product_id) },
       });
+
+      if (product) {
+        await prisma.orderItem.upsert({
+          where: {
+            orderId_productId: {
+              orderId: savedOrder.id,  
+              productId: product.id,
+            },
+          },
+          update: {
+            quantity: item.quantity,
+            price: parseFloat(item.price),
+          },
+          create: {
+            orderId: savedOrder.id,
+            productId: product.id,
+            quantity: item.quantity,
+            price: parseFloat(item.price),
+          },
+        });
+      }
     }
   }
-}
 
 
     res.json({
