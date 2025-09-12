@@ -5,13 +5,17 @@ import authRoutes from "./routes/auth.routes.js"
 import shopifyRoutes from "./routes/shopify.routes.js";
 import insightsRoutes from "./routes/insights.routes.js";
 
-
+const FrontedURL = "https://xeno-assignment-two.vercel.app/";
 
 
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors({
+  origin: FrontedURL,
+  credentials:true,
+}));
+
 app.use(express.json());
 
 app.use("/auth", authRoutes);
