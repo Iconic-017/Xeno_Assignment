@@ -1,8 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route , Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Signup from "./pages/Signup.jsx";
+
 import Dashboard from "./pages/Dashboard";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoutes.jsx";
+
 
 function App() {
   return (
@@ -20,8 +22,8 @@ function App() {
           }
         />
 
-        
-        <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
     </BrowserRouter>
   );
