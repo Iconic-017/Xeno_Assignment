@@ -238,8 +238,6 @@ model OrderItem {
 * Guest checkouts (orders without customers) are not shown in top customers.
 * Sync is **manual**; no real-time Shopify webhooks.
 * Pagination is minimal → large stores may need cursor-based sync.
-* Passwords stored in plain text for demo (⚠️ use bcrypt/argon2 in prod).
-* Deployment assumes managed MySQL (Railway/PlanetScale).
 
 ---
 
