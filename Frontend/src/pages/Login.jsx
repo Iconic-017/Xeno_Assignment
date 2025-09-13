@@ -123,6 +123,19 @@ export default function Login() {
             </button>
           </form>
 
+          {/* SIGNUP BUTTON */}
+          <div className="mt-6 text-center">
+            <p className="mb-3 text-sm text-slate-600">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate("/signup")}
+                className="text-blue-500 hover:underline"
+              >
+                Sign Up
+              </button>
+            </p>
+          </div>
+
           <div className="mt-6 text-center">
             <p className="mb-3 text-sm text-slate-600">
               Demo credentials
